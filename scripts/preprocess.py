@@ -54,4 +54,6 @@ def convert_mels():
             )
         )
 
-        np.save(audio_output + filename.replace(".wav", ".npy"), mel)
+        np.save(audio_output + filename.replace(".wav", ".npy"), mel.T)
+
+convert_mels()
