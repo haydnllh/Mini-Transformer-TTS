@@ -7,6 +7,7 @@ from src.models.prenets import EncoderPrenet, DecoderPrenet
 from src.models.mini_transformer import MiniTransformer
 from src.models.postnet import Postnet
 from src.utils.get_unicode import phonemes_to_id
+from src.datasets.tts_dataset import TTS_dataset
 from src.datasets.tts_dataloader import create_dataloader
 import numpy as np
 import pandas as pd
@@ -73,8 +74,11 @@ if __name__ == "__main__":
         if i > 0: break
 
         mel, stop = tts_model(phonemes_padded, mels_padded / 100, src_key_padding_mask=phonemes_mask, tgt_key_padding_mask=mels_mask)
-        print(mel)
-    #print(summary(tts_model, input_size=[(1, 113), (1, 622, 80)]))
+        print(mels_mask.shape, stop.shape)
 
-    
-            
+    dataset = TTS_dataset()
+    ids = torch.tensor(phonemes_to_id(np.array(dataset[0][0].split(" ")))).unsqueeze(0)
+    print(tts_model.infer(ids).shape)
+
+    #print(summary(tts_model, input_size=[(1, 113), (1, 622, 80)]))
+          
