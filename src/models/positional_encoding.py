@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+from torchsummary import summary
 
 
 # Sinusoidal positional encoding
@@ -23,14 +24,14 @@ class ScaledPositionalEncoding(nn.Module):
             torch.tensor([1.0])
         )  # Adapt to different scales between encoder input and decoder output
 
-    def forward(self, x):
-        return x + self.alpha * self.pe[: x.size(1)]
+    def forward(self, x, padding_mask=None):
+        encoded = x + self.alpha * self.pe[: x.size(1)]
+        if padding_mask is not None:
+            encoded = encoded * padding_mask
+        return encoded
     
 if __name__ == "__main__":
     torch.manual_seed(42)
     encode = ScaledPositionalEncoding(d_model=10, max_seq_len=15)
-    input = torch.rand(1,5,10)
-
-    encoded = encode(input)
-    print(encoded.shape)
-    print(encoded)
+    
+    print(summary(encode, (5,10)))

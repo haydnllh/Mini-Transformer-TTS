@@ -3,9 +3,8 @@ import torch.nn as nn
 from torchsummary import summary
 
 class Postnet(nn.Module):
-    def __init__(self, d_model=256, n_mels=80, stop_threshold=0.5):
+    def __init__(self, d_model=256, n_mels=80):
         super().__init__()
-        self.stop_threshold = stop_threshold
 
         self.mel_linear = nn.Linear(in_features=d_model, out_features=n_mels)
         self.conv_block = nn.Sequential(
@@ -26,12 +25,14 @@ class Postnet(nn.Module):
             nn.Sigmoid()
         )
 
-    def forward(self, x):
+    def forward(self, x, padding_mask=None):
         mel_linear = self.mel_linear(x).transpose(-2,-1)
         post_conv = self.conv_block(mel_linear)
 
         #Residual
         mel = (mel_linear + post_conv).transpose(-2,-1)
+        if padding_mask is not None:
+            mel = mel * padding_mask
 
         stop_vec = self.stop(x)
 

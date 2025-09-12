@@ -5,6 +5,7 @@ from src.utils.get_unicode import phonemes_to_id
 from src.datasets.tts_dataset import TTS_dataset
 import numpy as np
 
+### Collate function to make sure phonemes and mels are all padded
 def collate_fn(batch, pad=0):
     phonemes = []
     mels = []
@@ -41,5 +42,5 @@ if __name__ == "__main__":
     for i, (phonemes_padded, phonemes_mask, mels_padded, mels_mask) in enumerate(dataLoader):
         if i > 1: break
         print(phonemes_padded.shape, phonemes_mask.shape, mels_padded.shape, mels_mask.shape)
-        print(phonemes_padded)
-        print(phonemes_mask)
+        print(mels_padded)
+        print(mels_mask)
