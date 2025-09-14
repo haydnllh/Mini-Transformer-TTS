@@ -5,15 +5,16 @@ from torchsummary import summary
 
 # Sinusoidal positional encoding
 class ScaledPositionalEncoding(nn.Module):
-    def __init__(self, d_model, max_seq_len):
+    def __init__(self, d_model, max_seq_len, device="cpu"):
         super().__init__()
+        self.device = device
 
-        pe = torch.zeros(max_seq_len, d_model)
-        position = torch.arange(0, max_seq_len, dtype=torch.float32).unsqueeze(1)
+        pe = torch.zeros(max_seq_len, d_model).to(device)
+        position = torch.arange(0, max_seq_len, dtype=torch.float32).unsqueeze(1).to(device)
 
         exp_term = torch.reciprocal(
             torch.tensor(10000) ** torch.div(torch.arange(0, d_model, 2), d_model)
-        ).unsqueeze(0)
+        ).unsqueeze(0).to(device)
 
         pe[:, 0::2] = torch.sin(torch.matmul(position, exp_term))
         pe[:, 1::2] = torch.cos(torch.matmul(position, exp_term))

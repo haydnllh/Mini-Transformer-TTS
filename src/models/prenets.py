@@ -4,7 +4,7 @@ from src.utils.get_unicode import phonemes_to_id
 import numpy as np
 
 class EncoderPrenet(nn.Module):
-    def __init__(self, num_embeddings=80, d_model=256, padding_idx=None):
+    def __init__(self, num_embeddings=80, d_model=256, padding_idx=None, p=0.2, device="cpu"):
         super().__init__()
 
         self.embedding = nn.Embedding(num_embeddings=num_embeddings, embedding_dim=d_model, padding_idx=padding_idx)
@@ -14,17 +14,17 @@ class EncoderPrenet(nn.Module):
             nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=5, padding=2),
             nn.BatchNorm1d(num_features=d_model),
             nn.ReLU(),
-            nn.Dropout(),
+            nn.Dropout(p=p),
 
             nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=5, padding=2),
             nn.BatchNorm1d(num_features=d_model),
             nn.ReLU(),
-            nn.Dropout(),
+            nn.Dropout(p=p),
 
             nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=5, padding=2),
             nn.BatchNorm1d(num_features=d_model),
             nn.ReLU(),
-            nn.Dropout()
+            nn.Dropout(p=p)
         )
 
         ## Linear projection for 0 centered output
@@ -41,7 +41,7 @@ class EncoderPrenet(nn.Module):
         return x
 
 class DecoderPrenet(nn.Module):
-    def __init__(self, n_mels=80, hidden_units=256, d_model=256):
+    def __init__(self, n_mels=80, hidden_units=256, d_model=256, device="cpu"):
         super().__init__()
 
         self.prenet = nn.Sequential(

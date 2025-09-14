@@ -14,29 +14,31 @@ import pandas as pd
 from torchsummary import summary
 
 class TTS_model(nn.Module):
-    def __init__(self, d_model=256, max_n_phonemes=150, max_n_frames=650, vocab_size=80, n_mels=80, n_head=8, n_encoder=1, n_decoder=1, dim_feedforward=1024, stop_threshold=0.5):
+    def __init__(self, d_model=256, max_n_phonemes=150, max_n_frames=650, vocab_size=80, n_mels=80, n_head=8, n_encoder=1, n_decoder=1, dim_feedforward=1024, stop_threshold=0.5, device="cpu"):
         super().__init__()
         self.d_model = d_model
         self.n_mels = n_mels
         self.max_n_frames = max_n_frames
         self.stop_threshold = stop_threshold
+        self.device = device
 
-        self.encoder_pe = ScaledPositionalEncoding(d_model=d_model, max_seq_len=max_n_phonemes)
-        self.decoder_pe = ScaledPositionalEncoding(d_model=d_model, max_seq_len=max_n_frames)
+        self.encoder_pe = ScaledPositionalEncoding(d_model=d_model, max_seq_len=max_n_phonemes, device=device)
+        self.decoder_pe = ScaledPositionalEncoding(d_model=d_model, max_seq_len=max_n_frames, device=device)
 
-        self.encoder_prenet = EncoderPrenet(num_embeddings=vocab_size, d_model=d_model, padding_idx=0)
-        self.decoder_prenet = DecoderPrenet(n_mels=n_mels, d_model=d_model)
+        self.encoder_prenet = EncoderPrenet(num_embeddings=vocab_size, d_model=d_model, padding_idx=0, device=device)
+        self.decoder_prenet = DecoderPrenet(n_mels=n_mels, d_model=d_model, device=device)
 
-        self.transformer = MiniTransformer(d_model=d_model, nhead=n_head, n_encoder=n_encoder, n_decoder=n_decoder, dim_feedforward=dim_feedforward)
+        self.transformer = MiniTransformer(d_model=d_model, nhead=n_head, n_encoder=n_encoder, n_decoder=n_decoder, dim_feedforward=dim_feedforward, device=device)
         
-        self.postnet = Postnet(d_model=d_model, n_mels=n_mels)
+        self.postnet = Postnet(d_model=d_model, n_mels=n_mels, device=device)
 
 
     def forward(self, src, target, src_key_padding_mask=None, tgt_key_padding_mask=None):
         phonemes_encoded = self.encoder_pe(self.encoder_prenet(src), padding_mask=~src_key_padding_mask.unsqueeze(-1)) 
 
         batch = target.size(0)
-        mel_start = torch.concat((torch.zeros((batch, 1, self.n_mels)), target[:, :-1, :]), dim=1)
+        start_token = torch.zeros((batch, 1, self.n_mels)).to(self.device)
+        mel_start = torch.concat((start_token, target[:, :-1, :]), dim=1)
         mel_encoded = self.decoder_pe(self.decoder_prenet(mel_start), padding_mask=~tgt_key_padding_mask.unsqueeze(-1))
 
         generated = self.transformer(phonemes_encoded, mel_encoded, src_key_padding_mask=src_key_padding_mask, tgt_key_padding_mask=tgt_key_padding_mask)
@@ -47,7 +49,7 @@ class TTS_model(nn.Module):
     
     def infer(self, src):
         phonemes_encoded = self.encoder_pe(self.encoder_prenet(src))
-        mel = torch.zeros((1, 1, self.n_mels))
+        mel = torch.zeros((1, 1, self.n_mels)).to(self.device)
 
         for _ in range(self.max_n_frames):
             mel_encoded = self.decoder_pe(self.decoder_prenet(mel))
@@ -67,18 +69,18 @@ class TTS_model(nn.Module):
 
 if __name__ == "__main__":
     torch.manual_seed(42)
-    tts_model = TTS_model()
+    tts_model = TTS_model(n_encoder=3, n_decoder=3)
     dataLoader = create_dataloader()
 
     for i, (phonemes_padded, phonemes_mask, mels_padded, mels_mask) in enumerate(dataLoader):
         if i > 0: break
 
-        mel, stop = tts_model(phonemes_padded, mels_padded / 100, src_key_padding_mask=phonemes_mask, tgt_key_padding_mask=mels_mask)
-        print(mels_mask.shape, stop.shape)
+        #mel, stop = tts_model(phonemes_padded, mels_padded / 100, src_key_padding_mask=phonemes_mask, tgt_key_padding_mask=mels_mask)
+        #print(mels_mask.shape, stop.shape)
 
     dataset = TTS_dataset()
     ids = torch.tensor(phonemes_to_id(np.array(dataset[0][0].split(" ")))).unsqueeze(0)
-    print(tts_model.infer(ids).shape)
+    #print(tts_model.infer(ids).shape)
 
-    #print(summary(tts_model, input_size=[(1, 113), (1, 622, 80)]))
+    print(summary(tts_model, input_size=[(1, 113), (1, 622, 80)]))
           

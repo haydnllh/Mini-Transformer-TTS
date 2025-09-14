@@ -3,7 +3,7 @@ import torch.nn as nn
 from torchsummary import summary
 
 class Postnet(nn.Module):
-    def __init__(self, d_model=256, n_mels=80):
+    def __init__(self, d_model=256, n_mels=80, device="cpu"):
         super().__init__()
 
         self.mel_linear = nn.Linear(in_features=d_model, out_features=n_mels)
@@ -21,8 +21,11 @@ class Postnet(nn.Module):
 
         # Stop token, 1 if stop, 0 othewise
         self.stop = nn.Sequential(
-            nn.Linear(in_features=d_model, out_features=1),
-            nn.Sigmoid()
+            nn.Linear(in_features=d_model, out_features=d_model//2),
+            nn.ReLU(),
+            nn.Linear(in_features=d_model//2, out_features=d_model//4),
+            nn.ReLU(),
+            nn.Linear(in_features=d_model//4, out_features=1)
         )
 
     def forward(self, x, padding_mask=None):

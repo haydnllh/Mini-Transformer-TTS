@@ -52,7 +52,7 @@ def convert_mels():
             librosa.feature.melspectrogram(
                 y=waveform, sr=sr, n_fft=1024, hop_length=256, n_mels=80
             )
-        )
+        , ref=1e-12)
 
         np.save(audio_output + filename.replace(".wav", ".npy"), mel.T)
 
