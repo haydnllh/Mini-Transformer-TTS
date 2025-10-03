@@ -1,4 +1,5 @@
 .venv/
 data/
-
+trained_models/
+ignorethislol/
 __pycache__
