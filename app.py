@@ -13,8 +13,7 @@ model_url = "https://www.mediafire.com/file/k9bpk4qmkm6c7j0/refined_tts_model_we
 
 model_path = "./refined_tts_model_weights.pth"
 
-nltk.download('averaged_perceptron_tagger', download_dir='/tmp/nltk_data')
-os.environ['NLTK_DATA'] = '/tmp/nltk_data'
+nltk.download('averaged_perceptron_tagger_eng')
 
 if not os.path.exists(model_path):
     file = MF.Download(model_url, output=".")
