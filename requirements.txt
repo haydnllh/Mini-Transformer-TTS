@@ -8,6 +8,6 @@ pandas==2.3.3
 Requests==2.32.5
 sounddevice==0.5.2
 soundfile==0.13.1
-torch==2.8.0+cu126
+torch==2.8.0
 torch_summary==1.4.5
 tqdm==4.67.1
