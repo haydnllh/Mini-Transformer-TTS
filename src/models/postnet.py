@@ -6,18 +6,35 @@ class Postnet(nn.Module):
     def __init__(self, d_model=256, n_mels=80, device="cpu"):
         super().__init__()
 
-        self.mel_linear = nn.Linear(in_features=d_model, out_features=n_mels)
-        self.conv_block = nn.Sequential(
-            nn.Conv1d(in_channels=n_mels, out_channels=d_model, kernel_size=5, padding=2),
-            nn.Tanh(),
-            nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=5, padding=2),
-            nn.Tanh(),
-            nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=5, padding=2),
-            nn.Tanh(),
-            nn.Conv1d(in_channels=d_model, out_channels=d_model, kernel_size=5, padding=2),
-            nn.Tanh(),
-            nn.Conv1d(in_channels=d_model, out_channels=n_mels, kernel_size=5, padding=2),
+        self.mel_linear = nn.Sequential(
+            nn.Linear(in_features=d_model, out_features=d_model),
+            nn.ReLU(),
+            nn.Linear(in_features=d_model, out_features=d_model),
+            nn.ReLU(),
+            nn.Linear(in_features=d_model, out_features=n_mels),
         )
+        
+        self.conv_block = nn.Sequential(
+            nn.Conv1d(n_mels, d_model, kernel_size=5, padding=2),
+            nn.BatchNorm1d(d_model),
+            nn.Tanh(),
+            nn.Dropout(p=0.5),
+            nn.Conv1d(d_model, d_model, kernel_size=5, padding=2),
+            nn.BatchNorm1d(d_model),
+            nn.Tanh(),
+            nn.Dropout(p=0.5),
+            nn.Conv1d(d_model, d_model, kernel_size=5, padding=2),
+            nn.BatchNorm1d(d_model),
+            nn.Tanh(),
+            nn.Dropout(p=0.5),
+            nn.Conv1d(d_model, d_model, kernel_size=5, padding=2),
+            nn.BatchNorm1d(d_model),
+            nn.Tanh(),
+            nn.Dropout(p=0.5),
+            nn.Conv1d(d_model, n_mels, kernel_size=5, padding=2),
+            nn.Dropout(p=0.5),
+)       
+
 
         # Stop token, 1 if stop, 0 othewise
         self.stop = nn.Sequential(
@@ -25,7 +42,7 @@ class Postnet(nn.Module):
             nn.ReLU(),
             nn.Linear(in_features=d_model//2, out_features=d_model//4),
             nn.ReLU(),
-            nn.Linear(in_features=d_model//4, out_features=1)
+            nn.Linear(in_features=d_model//4, out_features=1),
         )
 
     def forward(self, x, padding_mask=None):
