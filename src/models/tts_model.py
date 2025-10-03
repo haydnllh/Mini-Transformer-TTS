@@ -14,7 +14,7 @@ import pandas as pd
 from torchsummary import summary
 
 class TTS_model(nn.Module):
-    def __init__(self, d_model=256, max_n_phonemes=150, max_n_frames=650, vocab_size=80, n_mels=80, n_head=8, n_encoder=1, n_decoder=1, dim_feedforward=1024, stop_threshold=0.5, device="cpu"):
+    def __init__(self, d_model=256, max_n_phonemes=250, max_n_frames=900, vocab_size=80, n_mels=80, n_head=8, n_encoder=1, n_decoder=1, dim_feedforward=1024, stop_threshold=0.5, device="cpu"):
         super().__init__()
         self.d_model = d_model
         self.n_mels = n_mels
