@@ -3,7 +3,7 @@ import torch
 import math
 from src.utils.generate_stop_target import generate_stop_target
 
-def train_model(model, mel_loss_fn, stop_loss_fn, optimiser, scheduler, data_loader, device, epochs, target_weight=70, stop_weight=1, save_dir="trained_models/"):
+def train_model(model, mel_loss_fn, stop_loss_fn, optimiser, data_loader, device, epochs, target_weight=1, stop_weight=1, scheduler=None, save_dir="trained_models/", batch=9999):
   model.train()
   losses = []
 
@@ -12,7 +12,8 @@ def train_model(model, mel_loss_fn, stop_loss_fn, optimiser, scheduler, data_loa
     total_mel_loss = 0
     total_stop_loss = 0
 
-    for phonemes_padded, phonemes_mask, mels_padded, mels_mask in tqdm(data_loader):
+    for i, (phonemes_padded, phonemes_mask, mels_padded, mels_mask) in enumerate(tqdm((data_loader))):
+      if i > batch: break
       phonemes_padded, phonemes_mask, mels_padded, mels_mask = phonemes_padded.to(device), phonemes_mask.to(device), mels_padded.to(device), mels_mask.to(device)
       mels_padded = mels_padded / 100 # Scale down
 
@@ -31,15 +32,15 @@ def train_model(model, mel_loss_fn, stop_loss_fn, optimiser, scheduler, data_loa
       optimiser.zero_grad()
       loss.backward()
       optimiser.step()
-      scheduler.step()
+      if scheduler is not None:
+        scheduler.step()
 
-    total_loss = total_loss / len(data_loader)
-    total_mel_loss = total_mel_loss / len(data_loader)
-    total_stop_loss = total_stop_loss / len(data_loader)
+    total_loss = total_loss
+    total_mel_loss = total_mel_loss 
+    total_stop_loss = total_stop_loss 
     losses.append(total_loss)
     
     if epoch % (math.ceil(epochs * 0.05)) == 0:
       tqdm.write(f"Epoch {epoch+1} | Total: {total_loss:.4f} | Mel: {total_mel_loss:.4f} | Stop: {total_stop_loss:.4f}")
       
-  print(losses)
   return losses
