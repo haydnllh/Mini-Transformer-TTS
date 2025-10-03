@@ -17,7 +17,7 @@ if not os.path.exists(model_path):
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 tts_model = TTS_model(device=device)
-tts_model.load_state_dict(torch.load("refined_tts_model_weights.pth", weights_only=True))
+tts_model.load_state_dict(torch.load("refined_tts_model_weights.pth", weights_only=True, map_location="cpu"))
 
 def demo(text):
     audio = infer(text, tts_model, device=device, display=False, play=False)
