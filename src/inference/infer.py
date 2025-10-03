@@ -3,7 +3,7 @@ from src.utils.get_unicode import phonemes_to_id
 from src.utils.text_to_phonemes import text_to_phonemes
 import librosa
 import matplotlib.pyplot as plt
-# import sounddevice as sd
+import sounddevice as sd
 import numpy as np
 
 def infer(text, model, losses=None, device="cpu", display=True, play=True):
@@ -22,7 +22,7 @@ def infer(text, model, losses=None, device="cpu", display=True, play=True):
         generated_waveform = librosa.griffinlim(generated_spectrogram, hop_length=512, n_fft=2048) #An approximation from mel spectrograms
 
         if play: 
-            # sd.play(generated_waveform, 22050)
+            sd.play(generated_waveform, 22050)
             print(generated.shape)
 
     if display and losses is not None:
