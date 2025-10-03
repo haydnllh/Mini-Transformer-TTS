@@ -28,7 +28,7 @@ def convert_phonemes():
         for row in tqdm(fin):
             [file_id, _, text] = row.split("|")
 
-            phonemes = [x.strip() for x in g2p(text) if x.strip() != ""]
+            phonemes = [x.strip() if x.strip() != "" else "ss" for x in g2p(text)]
             eos = phonemes[-1] in END_PUNCT
 
             if sos:
@@ -47,12 +47,11 @@ def convert_phonemes():
 ### Store raw wav files in log-mel spectrum
 def convert_mels():
     for filename in tqdm(os.listdir(audio_input)):
-        waveform, sr = librosa.load(audio_input + filename, sr=16000)
+        waveform, sr = librosa.load(audio_input + filename, sr=22050)
         mel = librosa.power_to_db(
             librosa.feature.melspectrogram(
-                y=waveform, sr=sr, n_fft=1024, hop_length=256, n_mels=80
-            )
-        , ref=1e-12)
+                y=waveform, sr=sr, n_fft=2048, hop_length=512, n_mels=80
+            ))
 
         np.save(audio_output + filename.replace(".wav", ".npy"), mel.T)
 
