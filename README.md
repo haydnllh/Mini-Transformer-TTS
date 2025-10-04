@@ -33,9 +33,21 @@ Epochs: 500
 
 ## Results
 
+Mean Opinion Score of 3.2 from 5 testers.
+
 Input: Printing, then, for our purpose, may be considered as the art of making books by means of movable types.
 
 Output:
 
-image here
+<img src="images/Figure_1.png" width=100% >
+
+## Limitations
+
+- Struggles with very short or very long sequences
+- Training time increases linearly when scaled up
+- Output tends to smoothen the finer details of the original signal
+- Vocoder uses the Griffin-Lim algorithm which makes the generated audio sounds "robotic" and "unnatural"
+
+## References
+- Li, Naihan, et al. "Neural speech synthesis with transformer network."
 
