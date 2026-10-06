@@ -34,6 +34,12 @@ class TTS_model(nn.Module):
 
 
     def forward(self, src, target, src_key_padding_mask=None, tgt_key_padding_mask=None):
+        if src_key_padding_mask is None:
+            src_key_padding_mask = torch.zeros_like(src, dtype=torch.bool, device=src.device)
+
+        if tgt_key_padding_mask is None:
+            tgt_key_padding_mask = torch.zeros((target.size(0), target.size(1)), dtype=torch.bool, device=target.device)
+
         phonemes_encoded = self.encoder_pe(self.encoder_prenet(src), padding_mask=~src_key_padding_mask.unsqueeze(-1)) 
 
         batch = target.size(0)
