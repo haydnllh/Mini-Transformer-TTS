@@ -3,6 +3,10 @@ This model is a transformer-based text to speech model that uses self attention 
 
 Demo available [here](https://huggingface.co/spaces/haydnllh/Mini-Transformer-TTS)
 
+## Deployment & Optimization
+
+This application optimizes speech synthesis for production by first converting the model to **ONNX** runtime format for fast, low-latency inference. The core logic is exposed via a lightweight **FastAPI** web service for seamless API integration. Finally, the entire application—including audio dependencies (`ffmpeg`, `libsndfile`) and pre-downloaded NLTK assets—is **Dockerized** into a multi-stage container to ensure reliable cross-platform deployment.
+
 ## Method
 
 Architecture: Embedding Layer -> Encoder/Decoder prenets -> Positional Encoding -> Encoder Block (x3) -> Decoder Block (x3) -> 5 Layer Conv1d Postnet + Stop Token -> Vocoder (Griffin-Lim Algorithm)
